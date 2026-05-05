@@ -44,6 +44,12 @@ Imagine the following scenario:
 - You arrive home at **6:00 PM**
 - You want to start the next session at **7:30 PM**
 
+The idea is:
+
+- You use the first session from **6:00 PM to 7:30 PM**
+- At **7:30 PM**, the session resets
+- You can immediately start a new session without wasting time
+
 The calculator will:
 
 - Subtract the session duration (5 hours)
@@ -68,15 +74,12 @@ This project is ideal for:
 
 ## 🤖 Automation (Optional)
 
-The calculator can also be used alongside automation, such as:
+The calculator can be used alongside automation, such as:
 
 - Scripts or bots that start sessions automatically
 - Scheduled actions on computer or mobile devices
 
-This allows users to:
-
-- Avoid manual session starts
-- Gain more precise time control
+⚠️ **Note:** Automation is not built into this calculator. Users must set up any bots or scripts externally.
 
 ---
 
@@ -84,7 +87,7 @@ This allows users to:
 
 - Computer
 - Mobile devices
-- Automated systems
+- External automated systems
 
 ---
 
@@ -117,7 +120,6 @@ This calculator is a simple yet powerful tool for anyone using time-limited sess
 This project is free to use for study and improvement purposes.
 
 ---
-
 
 
 
@@ -164,6 +166,12 @@ Imagine o seguinte cenário:
 - Você chega em casa às **18:00**
 - Pretende começar a próxima sessão às **19:30**
 
+A ideia é:
+
+- Você usa a primeira sessão das **18:00 até 19:30**
+- Às **19:30**, a sessão é reiniciada
+- Você pode começar outra sessão imediatamente, sem desperdício
+
 A calculadora irá:
 
 - Subtrair o tempo da sessão (5 horas)
@@ -188,15 +196,12 @@ Este projeto é ideal para:
 
 ## 🤖 Automação (Opcional)
 
-A calculadora também pode ser usada junto com automações, como:
+A calculadora pode ser usada junto com automações, como:
 
 - Scripts ou bots que iniciam sessões automaticamente
 - Programação de ações no computador ou celular
 
-Isso permite que o usuário:
-
-- Não precise iniciar manualmente
-- Tenha maior precisão no controle de tempo
+⚠️ **Observação:** A automação não faz parte da calculadora. O usuário deve configurar bots ou scripts separadamente.
 
 ---
 
@@ -204,7 +209,7 @@ Isso permite que o usuário:
 
 - Computador
 - Celular
-- Sistemas automatizados
+- Sistemas automatizados externos
 
 ---
 
@@ -237,5 +242,3 @@ Essa calculadora é uma ferramenta simples, mas extremamente útil para quem uti
 Este projeto é de uso livre para fins de estudo e melhoria.
 
 ---
-
-
