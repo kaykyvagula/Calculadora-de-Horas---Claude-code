@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calculadora de Ciclo de Horas</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #ffffff;
+        --panel: #f5f5f7;
+        --panel-strong: #ededf0;
+        --text: #1d1d1f;
+        --muted: #6e6e73;
+        --line: #d2d2d7;
+        --line-strong: #86868b;
+        --blue: #0071e3;
+        --blue-soft: #e8f2ff;
+        --green: #12805c;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
+        --radius-lg: 24px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-height: 100%;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+          "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+        letter-spacing: 0;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      .page {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.55fr);
+        gap: clamp(32px, 6vw, 96px);
+        align-items: center;
+        padding: clamp(28px, 5vw, 72px) clamp(22px, 8vw, 160px);
+      }
+
+      .showcase {
+        min-height: clamp(520px, 74vh, 760px);
+        border-radius: var(--radius-lg);
+        background: var(--panel);
+        display: grid;
+        place-items: center;
+        padding: clamp(24px, 5vw, 72px);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      }
+
+      .time-stage {
+        width: min(680px, 100%);
+        display: grid;
+        gap: 28px;
+        justify-items: center;
+      }
+
+      .live-clock {
+        width: 100%;
+        min-height: 260px;
+        border-radius: 28px;
+        color: #f5f5f7;
+        background:
+          radial-gradient(circle at 75% 20%, rgba(255, 255, 255, 0.18), transparent 30%),
+          linear-gradient(145deg, #424245 0%, #111113 64%, #050505 100%);
+        box-shadow:
+          0 28px 60px rgba(0, 0, 0, 0.22),
+          inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        padding: 38px 28px;
+        text-align: center;
+      }
+
+      .clock-label {
+        margin: 0 0 12px;
+        color: rgba(245, 245, 247, 0.72);
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .clock-time {
+        margin: 0;
+        font-size: clamp(58px, 10vw, 108px);
+        line-height: 0.95;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0;
+      }
+
+      .clock-date {
+        margin: 16px 0 0;
+        color: rgba(245, 245, 247, 0.72);
+        font-size: clamp(16px, 2vw, 20px);
+        font-weight: 500;
+      }
+
+      .timeline {
+        width: min(560px, 100%);
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 16px;
+        align-items: center;
+      }
+
+      .timeline-card {
+        min-width: 0;
+        min-height: 88px;
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        background: rgba(255, 255, 255, 0.78);
+        padding: 16px;
+        display: grid;
+        gap: 6px;
+        align-content: center;
+      }
+
+      .timeline-card span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .timeline-card strong {
+        overflow-wrap: anywhere;
+        font-size: clamp(24px, 4vw, 34px);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .timeline-line {
+        width: 56px;
+        height: 4px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--line), var(--line-strong));
+        position: relative;
+      }
+
+      .timeline-line::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: -2px;
+        width: 10px;
+        height: 10px;
+        border-top: 3px solid var(--line-strong);
+        border-right: 3px solid var(--line-strong);
+        transform: translateY(-50%) rotate(45deg);
+      }
+
+      .controls {
+        align-self: stretch;
+        max-width: 440px;
+        display: grid;
+        gap: 28px;
+      }
+
+      .intro h1,
+      .section-title {
+        margin: 0;
+        color: var(--text);
+        font-size: clamp(26px, 3vw, 34px);
+        line-height: 1.1;
+        font-weight: 700;
+      }
+
+      .intro h1 span,
+      .section-title span {
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .intro p {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.45;
+      }
+
+      .option-group {
+        display: grid;
+        gap: 14px;
+      }
+
+      .option-box {
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-md);
+        background: #fff;
+        padding: 16px;
+        display: grid;
+        gap: 12px;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .option-box.active {
+        border: 2px solid var(--blue);
+        padding: 15px;
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.08);
+      }
+
+      .option-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: baseline;
+      }
+
+      .option-head strong {
+        font-size: 18px;
+      }
+
+      .option-head span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+        text-align: right;
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .field {
+        display: grid;
+        gap: 8px;
+      }
+
+      .field label {
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .field input {
+        width: 100%;
+        min-height: 48px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        background: #fbfbfd;
+        color: var(--text);
+        padding: 10px 12px;
+        outline: none;
+        font-size: 18px;
+        font-variant-numeric: tabular-nums;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      }
+
+      .field input:focus {
+        border-color: var(--blue);
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
+      }
+
+      .presets {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .preset-button {
+        min-height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--panel);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 650;
+        transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+      }
+
+      .preset-button:hover {
+        background: var(--blue-soft);
+        border-color: rgba(0, 113, 227, 0.36);
+        color: #005fb8;
+      }
+
+      .result {
+        border-radius: var(--radius-lg);
+        background: var(--text);
+        color: #f5f5f7;
+        padding: 22px;
+        box-shadow: var(--shadow);
+        display: grid;
+        gap: 12px;
+      }
+
+      .result-label {
+        margin: 0;
+        color: rgba(245, 245, 247, 0.68);
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .result-time {
+        margin: 0;
+        font-size: clamp(44px, 7vw, 64px);
+        line-height: 1;
+        font-weight: 750;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .result-date {
+        margin: 0;
+        color: rgba(245, 245, 247, 0.78);
+        font-size: 16px;
+        line-height: 1.45;
+      }
+
+      .status-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 4px;
+      }
+
+      .status-item {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.35;
+      }
+
+      .status-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--green);
+        flex: 0 0 auto;
+        box-shadow: 0 0 0 4px rgba(18, 128, 92, 0.11);
+      }
+
+      .error {
+        display: none;
+        border-radius: var(--radius-md);
+        border: 1px solid #ffd7d7;
+        background: #fff5f5;
+        color: #a10f0f;
+        padding: 12px 14px;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.35;
+      }
+
+      .error.visible {
+        display: block;
+      }
+
+      @media (max-width: 980px) {
+        .page {
+          grid-template-columns: 1fr;
+          align-items: start;
+          gap: 30px;
+        }
+
+        .showcase {
+          min-height: auto;
+        }
+
+        .controls {
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .page {
+          padding: 18px;
+        }
+
+        .showcase {
+          padding: 18px;
+          border-radius: 18px;
+        }
+
+        .live-clock {
+          min-height: 220px;
+          border-radius: 20px;
+        }
+
+        .timeline {
+          grid-template-columns: 1fr;
+        }
+
+        .timeline-line {
+          width: 4px;
+          height: 36px;
+          justify-self: center;
+          background: linear-gradient(180deg, var(--line), var(--line-strong));
+        }
+
+        .timeline-line::after {
+          top: auto;
+          right: auto;
+          bottom: -2px;
+          left: 50%;
+          transform: translateX(-50%) rotate(135deg);
+        }
+
+        .field-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="showcase" aria-label="Horario atual e resumo do ciclo">
+        <div class="time-stage">
+          <div class="live-clock">
+            <p class="clock-label">Agora</p>
+            <p class="clock-time" id="currentTime">--:--:--</p>
+            <p class="clock-date" id="currentDate">Carregando...</p>
+          </div>
+
+          <div class="timeline" aria-label="Resumo do ciclo">
+            <div class="timeline-card">
+              <span>Inicio ideal</span>
+              <strong id="timelineStart">--:--</strong>
+            </div>
+            <div class="timeline-line" aria-hidden="true"></div>
+            <div class="timeline-card">
+              <span>Fim desejado</span>
+              <strong id="timelineEnd">--:--</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="Calculadora">
+        <div class="intro">
+          <h1>Ciclo. <span>Calcule o inicio ideal.</span></h1>
+          <p>Escolha a duracao do ciclo e a hora em que voce quer estar livre para comecar o proximo.</p>
+        </div>
+
+        <div class="option-group">
+          <h2 class="section-title">Duracao. <span>Horas e minutos.</span></h2>
+          <div class="option-box active">
+            <div class="option-head">
+              <strong>Ciclo atual</strong>
+              <span>Atualiza sozinho</span>
+            </div>
+
+            <div class="field-grid">
+              <div class="field">
+                <label for="durationHours">Horas</label>
+                <input id="durationHours" type="number" inputmode="numeric" min="0" max="99" step="1" value="5">
+              </div>
+              <div class="field">
+                <label for="durationMinutes">Minutos</label>
+                <input id="durationMinutes" type="number" inputmode="numeric" min="0" max="59" step="1" value="0">
+              </div>
+            </div>
+
+            <div class="presets" aria-label="Atalhos de duracao">
+              <button class="preset-button" type="button" data-hours="3" data-minutes="0">3h</button>
+              <button class="preset-button" type="button" data-hours="5" data-minutes="0">5h</button>
+              <button class="preset-button" type="button" data-hours="4" data-minutes="30">4h30</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="option-group">
+          <h2 class="section-title">Fim. <span>Quando quer usar de novo.</span></h2>
+          <div class="option-box">
+            <div class="field">
+              <label for="targetEnd">Horario desejado de termino</label>
+              <input id="targetEnd" type="time" value="12:30">
+            </div>
+          </div>
+        </div>
+
+        <div class="error" id="errorMessage" role="alert"></div>
+
+        <section class="result" aria-label="Resultado">
+          <p class="result-label">Inicie as</p>
+          <p class="result-time" id="resultTime">--:--</p>
+          <p class="result-date" id="resultDate">Preencha os campos para calcular.</p>
+        </section>
+
+        <div class="status-list" aria-live="polite">
+          <div class="status-item">
+            <span class="status-dot"></span>
+            <span id="statusDay">Aguardando calculo.</span>
+          </div>
+          <div class="status-item">
+            <span class="status-dot"></span>
+            <span id="statusCountdown">O relogio usa a hora real do computador.</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const durationHours = document.getElementById("durationHours");
+      const durationMinutes = document.getElementById("durationMinutes");
+      const targetEnd = document.getElementById("targetEnd");
+      const currentTime = document.getElementById("currentTime");
+      const currentDate = document.getElementById("currentDate");
+      const resultTime = document.getElementById("resultTime");
+      const resultDate = document.getElementById("resultDate");
+      const timelineStart = document.getElementById("timelineStart");
+      const timelineEnd = document.getElementById("timelineEnd");
+      const statusDay = document.getElementById("statusDay");
+      const statusCountdown = document.getElementById("statusCountdown");
+      const errorMessage = document.getElementById("errorMessage");
+      const presetButtons = document.querySelectorAll(".preset-button");
+
+      const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+
+      const shortTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long"
+      });
+
+      function parseNumber(input) {
+        if (input.value.trim() === "") {
+          return NaN;
+        }
+
+        return Number(input.value);
+      }
+
+      function parseTargetTime(value) {
+        if (!value || !value.includes(":")) {
+          return null;
+        }
+
+        const [hours, minutes] = value.split(":").map(Number);
+
+        if (
+          Number.isNaN(hours) ||
+          Number.isNaN(minutes) ||
+          hours < 0 ||
+          hours > 23 ||
+          minutes < 0 ||
+          minutes > 59
+        ) {
+          return null;
+        }
+
+        return { hours, minutes };
+      }
+
+      function startOfToday(now) {
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      }
+
+      function formatDistance(milliseconds) {
+        const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        const parts = [];
+
+        if (days > 0) {
+          parts.push(`${days}d`);
+        }
+
+        if (hours > 0 || days > 0) {
+          parts.push(`${hours}h`);
+        }
+
+        if (minutes > 0 || hours > 0 || days > 0) {
+          parts.push(`${minutes}min`);
+        }
+
+        parts.push(`${seconds}s`);
+
+        return parts.join(" ");
+      }
+
+      function setError(message) {
+        errorMessage.textContent = message;
+        errorMessage.classList.add("visible");
+        resultTime.textContent = "--:--";
+        resultDate.textContent = "Ajuste os campos para calcular.";
+        timelineStart.textContent = "--:--";
+        statusDay.textContent = "Aguardando campos validos.";
+        statusCountdown.textContent = "O calculo volta automaticamente quando tudo estiver preenchido.";
+      }
+
+      function clearError() {
+        errorMessage.textContent = "";
+        errorMessage.classList.remove("visible");
+      }
+
+      function calculateCycle(now) {
+        const hours = parseNumber(durationHours);
+        const minutes = parseNumber(durationMinutes);
+        const endParts = parseTargetTime(targetEnd.value);
+
+        timelineEnd.textContent = targetEnd.value || "--:--";
+
+        if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+          setError("Informe uma duracao valida em horas e minutos.");
+          return;
+        }
+
+        if (hours < 0 || minutes < 0 || minutes > 59) {
+          setError("Use horas positivas e minutos entre 0 e 59.");
+          return;
+        }
+
+        const durationInMinutes = Math.round(hours) * 60 + Math.round(minutes);
+
+        if (durationInMinutes <= 0) {
+          setError("A duracao precisa ser maior que zero.");
+          return;
+        }
+
+        if (!endParts) {
+          setError("Escolha um horario de termino valido.");
+          return;
+        }
+
+        clearError();
+
+        const today = startOfToday(now);
+        let endDate = new Date(today);
+        endDate.setHours(endParts.hours, endParts.minutes, 0, 0);
+
+        let startDate = new Date(endDate.getTime() - durationInMinutes * 60000);
+
+        while (startDate <= now) {
+          endDate = new Date(endDate.getTime() + 24 * 60 * 60000);
+          startDate = new Date(endDate.getTime() - durationInMinutes * 60000);
+        }
+
+        const sameCalendarDay =
+          startDate.getFullYear() === now.getFullYear() &&
+          startDate.getMonth() === now.getMonth() &&
+          startDate.getDate() === now.getDate();
+
+        const endSameCalendarDay =
+          endDate.getFullYear() === now.getFullYear() &&
+          endDate.getMonth() === now.getMonth() &&
+          endDate.getDate() === now.getDate();
+
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        const startIsTomorrow =
+          startDate.getFullYear() === tomorrow.getFullYear() &&
+          startDate.getMonth() === tomorrow.getMonth() &&
+          startDate.getDate() === tomorrow.getDate();
+
+        const startDayText = sameCalendarDay
+          ? "hoje"
+          : startIsTomorrow
+            ? "amanha"
+            : `em ${dateFormatter.format(startDate)}`;
+        const endDayText = endSameCalendarDay
+          ? "hoje"
+          : `em ${dateFormatter.format(endDate)}`;
+
+        resultTime.textContent = shortTimeFormatter.format(startDate);
+        resultDate.textContent = `Para terminar ${endDayText} as ${shortTimeFormatter.format(endDate)}.`;
+        timelineStart.textContent = shortTimeFormatter.format(startDate);
+        timelineEnd.textContent = shortTimeFormatter.format(endDate);
+        statusDay.textContent = `O inicio ideal e ${startDayText}.`;
+        statusCountdown.textContent = `Faltam ${formatDistance(startDate - now)} para iniciar.`;
+      }
+
+      function update() {
+        const now = new Date();
+        currentTime.textContent = timeFormatter.format(now);
+        currentDate.textContent = dateFormatter.format(now);
+        calculateCycle(now);
+      }
+
+      [durationHours, durationMinutes, targetEnd].forEach((input) => {
+        input.addEventListener("input", update);
+      });
+
+      presetButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          durationHours.value = button.dataset.hours;
+          durationMinutes.value = button.dataset.minutes;
+          update();
+        });
+      });
+
+      update();
+      window.setInterval(update, 1000);
+    </script>
+  </body>
+</html>
